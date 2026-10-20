@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glendale Heights Mystery Geocache - Snap & Solve</title>
+    <!-- Tailwind CSS for modern layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Quicksand:wght@500;700&display=swap');
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        .polaroid-font {
+            font-family: 'Permanent Marker', cursive;
+        }
+
+        /* Camera Flash Effect */
+        #flash-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out;
+        }
+        #flash-overlay.active {
+            opacity: 0.95;
+        }
+
+        /* Photo Eject Animation */
+        .photo-frame {
+            transform-origin: top center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .photo-eject {
+            animation: eject 0.5s ease-out forwards;
+        }
+
+        @keyframes eject {
+            0% {
+                transform: translateY(-80px) scale(0.9);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Custom camera styling */
+        .camera-body {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .shutter-btn {
+            background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.4);
+            transition: all 0.1s ease;
+        }
+        .shutter-btn:active {
+            transform: translateY(3px) scale(0.97);
+            box-shadow: 0 1px 2px -1px rgba(0,0,0,0.4), inset 0 1px 1px rgba(0,0,0,0.4);
+        }
+
+        /* Thumbnail gallery scrollbar */
+        .gallery-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 4px;
+        }
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-100 antialiased selection:bg-amber-400 selection:text-slate-900">
+
+    <!-- Flash Overlay -->
+    <div id="flash-overlay" class="fixed inset-0 bg-white z-50"></div>
+
+    <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col items-center">
+        
+        <!-- Header & Instructions -->
+        <header class="text-center mb-6 max-w-2xl">
+            <div class="inline-flex items-center justify-center p-2.5 px-4 bg-amber-500/10 text-amber-400 rounded-full mb-3 border border-amber-500/20 shadow-sm">
+                <i class="fa-solid fa-camera-retro text-xl mr-2"></i>
+                <span class="font-bold tracking-wide uppercase text-xs">Glendale Heights Mystery Geocache</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
+                Touring Glendale Heights, IL
+            </h1>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed bg-slate-800/80 backdrop-blur-md p-4 rounded-xl border border-slate-700/60 shadow-lg">
+                📸 You are a photographer taking pictures around town in Glendale Heights, Illinois! From Sports Hub to Glendale Lakes Golf Club and East Branch DuPage River, click the red shutter button on the camera below to snap photos. 
+                <strong class="text-amber-300 block mt-1">Each time you take a picture, make sure to look at it closely to see if there are a set of coordinates in it!</strong>
+            </p>
+        </header>
+
+        <!-- Main Interactive Area -->
+        <main class="w-full flex flex-col lg:flex-row gap-8 items-center justify-center my-2">
+            
+            <!-- Camera UI Controls -->
+            <div class="camera-body w-full max-w-xs p-6 rounded-3xl border-2 border-slate-700 flex flex-col items-center relative shadow-2xl">
+                <!-- Top Camera Details -->
+                <div class="w-full flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+                        <span class="text-xs font-mono text-slate-400 uppercase tracking-widest">GH-35mm LENS</span>
+                    </div>
+                    <!-- Photo Counter -->
+                    <div class="bg-slate-950 px-3 py-1 rounded-md border border-slate-800 text-amber-400 font-mono text-xs shadow-inner">
+                        SHOTS: <span id="photo-count" class="text-white font-bold">0</span>/32
+                    </div>
+                </div>
+
+                <!-- Lens / Viewfinder Graphic -->
+                <div class="relative my-2 group cursor-pointer" id="lens-click-area" title="Click Lens to Snap!">
+                    <div class="w-40 h-40 rounded-full bg-slate-900 border-8 border-slate-800 flex items-center justify-center shadow-inner relative overflow-hidden group-hover:border-slate-700 transition-colors">
+                        <div class="w-28 h-28 rounded-full bg-slate-800 border-4 border-slate-700 flex items-center justify-center">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-900 via-indigo-700 to-sky-400 border-2 border-indigo-400/30 opacity-90 flex items-center justify-center">
+                                <div class="w-6 h-6 rounded-full bg-white/25 blur-xs"></div>
+                            </div>
+                        </div>
+                        <!-- Glass Glare -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- Big Shutter Button -->
+                <div class="mt-4 flex flex-col items-center">
+                    <button id="shutter-btn" class="shutter-btn w-20 h-20 rounded-full border-4 border-slate-800 text-white font-bold text-xs uppercase tracking-wider flex flex-col items-center justify-center group focus:outline-none focus:ring-4 focus:ring-red-500/50">
+                        <i class="fa-solid fa-camera text-2xl mb-0.5 group-hover:scale-110 transition-transform"></i>
+                        <span>SNAP</span>
+                    </button>
+                    <span class="text-xs text-slate-400 mt-2 font-medium">Click to snap photo</span>
+                </div>
+            </div>
+
+            <!-- Polaroid Photo Output Frame -->
+            <div id="photo-wrapper" class="photo-frame bg-white p-4 pt-4 pb-6 rounded-md shadow-2xl max-w-md w-full border border-slate-200 text-slate-900 flex flex-col items-center">
+                
+                <!-- Canvas Rendering Surface -->
+                <div class="relative w-full aspect-square bg-slate-900 rounded-xs overflow-hidden border border-slate-300 shadow-inner">
+                    <canvas id="photoCanvas" width="500" height="500" class="w-full h-full object-cover"></canvas>
+                </div>
+
+                <!-- Polaroid Bottom Caption -->
+                <div class="mt-4 w-full text-center">
+                    <p id="photo-caption" class="polaroid-font text-lg text-slate-800 min-h-[2.5rem] flex items-center justify-center px-2">
+                        Click the camera button to snap your first photo around Glendale Heights!
+                    </p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Gallery / Recent Snaps Strip -->
+        <section class="w-full max-w-4xl mt-8 bg-slate-900/60 backdrop-blur-md rounded-2xl p-4 border border-slate-800">
+            <div class="flex justify-between items-center mb-3 px-1">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-images text-amber-400"></i> Glendale Heights Photo Album
+                </h3>
+                <span class="text-xs text-slate-500">Click any saved thumbnail to re-examine</span>
+            </div>
+            <div id="gallery-strip" class="gallery-scroll flex gap-3 overflow-x-auto pb-2 min-h-[76px] items-center">
+                <div id="empty-album-msg" class="text-xs text-slate-500 italic w-full text-center py-2">
+                    No photos taken yet. Snap pictures around Glendale Heights!
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-slate-400 text-sm flex flex-col sm:flex-row gap-4 items-center">
+            <button id="reset-btn" class="text-xs text-slate-400 hover:text-amber-400 underline transition-colors">
+                Shuffle & Reset Deck
+            </button>
+            <span class="hidden sm:inline">•</span>
+            <p class="text-xs text-slate-500">
+                Glendale Heights, IL Mystery Geocache • 30+ Random Pictures Deck
+            </p>
+        </footer>
+    </div>
+
+    <!-- Audio Synthesis Script for Shutter Sound -->
+    <script>
+        // Web Audio API Shutter Sound Generator
+        function playShutterSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                
+                const bufferSize = ctx.sampleRate * 0.09;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1200;
+
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.9, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.09);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+
+                noise.start();
+            } catch (e) {
+                // Audio context fallback
+            }
+        }
+
+        // ==========================================
+        // REAL FACE SPRITESET GENERATOR (Embedded / Standalone)
+        // ==========================================
+        const FACE_SPRITES = [];
+        let facesLoaded = false;
+
+        // Custom Face Feature Definitions for Vector Fallback / Standalone Rendering
+        const FACE_PROFILES = [
+            { skin: '#f1c27d', hair: '#332922', glasses: true, facialHair: 'none', hairStyle: 'short_dark', name: 'Wide Smile' },
+            { skin: '#e0ac69', hair: '#94a3b8', glasses: false, facialHair: 'goatee', hairStyle: 'grey_short', name: 'Grey Goatee' },
+            { skin: '#f1c27d', hair: '#451a03', glasses: true, facialHair: 'none', hairStyle: 'brunette_up', name: 'Brunette Glasses' },
+            { skin: '#ffdbac', hair: 'none', glasses: false, facialHair: 'stubble', hairStyle: 'bald', name: 'Bald Stubble' },
+            { skin: '#e0ac69', hair: '#64748b', glasses: true, facialHair: 'goatee', hairStyle: 'grey_receding', name: 'Glasses Goatee' },
+            { skin: '#f1c27d', hair: '#451a03', glasses: false, facialHair: 'full_beard', hairStyle: 'bald_top', name: 'Bushy Beard' },
+            { skin: '#ffdbac', hair: '#64748b', glasses: true, facialHair: 'none', hairStyle: 'grey_crop', name: 'Smiling Glasses' },
+            { skin: '#e0ac69', hair: '#94a3b8', glasses: true, facialHair: 'stubble', hairStyle: 'grey_thin', name: 'Round Glasses' },
+            { skin: '#f1c27d', hair: '#94a3b8', glasses: false, facialHair: 'none', hairStyle: 'grey_wavy', name: 'Wavy Hair' }
+        ];
+
+        function prepareFaceSprites() {
+            FACE_PROFILES.forEach((profile, i) => {
+                const canvas = document.createElement('canvas');
+                const cW = 180;
+                const cH = 220;
+                canvas.width = cW;
+                canvas.height = cH;
+                const cCtx = canvas.getContext('2d');
+
+                // Head Base
+                cCtx.fillStyle = profile.skin;
+                cCtx.beginPath();
+                cCtx.ellipse(90, 110, 65, 85, 0, 0, Math.PI * 2);
+                cCtx.fill();
+
+                // Hair Styling
+                cCtx.fillStyle = profile.hair !== 'none' ? profile.hair : 'transparent';
+                if (profile.hairStyle === 'short_dark') {
+                    cCtx.beginPath(); cCtx.ellipse(90, 65, 68, 40, 0, Math.PI, Math.PI * 2); cCtx.fill();
+                } else if (profile.hairStyle === 'grey_short' || profile.hairStyle === 'grey_crop') {
+                    cCtx.beginPath(); cCtx.ellipse(90, 60, 68, 35, 0, Math.PI, Math.PI * 2); cCtx.fill();
+                } else if (profile.hairStyle === 'brunette_up') {
+                    cCtx.beginPath(); cCtx.ellipse(90, 50, 70, 45, 0, Math.PI, Math.PI * 2); cCtx.fill();
+                    cCtx.beginPath(); cCtx.arc(90, 25, 30, 0, Math.PI * 2); cCtx.fill();
+                } else if (profile.hairStyle === 'grey_wavy') {
+                    cCtx.beginPath(); cCtx.ellipse(90, 75, 75, 60, 0, 0, Math.PI * 2); cCtx.fill();
+                } else if (profile.hairStyle === 'bald_top') {
+                    cCtx.fillRect(20, 90, 20, 50);
+                    cCtx.fillRect(140, 90, 20, 50);
+                }
+
+                // Eyes & Smile
+                cCtx.fillStyle = '#0f172a';
+                cCtx.beginPath(); cCtx.arc(65, 105, 7, 0, Math.PI * 2); cCtx.fill();
+                cCtx.beginPath(); cCtx.arc(115, 105, 7, 0, Math.PI * 2); cCtx.fill();
+
+                // Smile
+                cCtx.strokeStyle = '#0f172a';
+                cCtx.lineWidth = 4;
+                cCtx.beginPath();
+                cCtx.arc(90, 130, 25, 0.1 * Math.PI, 0.9 * Math.PI);
+                cCtx.stroke();
+
+                // Facial Hair
+                if (profile.facialHair === 'goatee') {
+                    cCtx.fillStyle = profile.hair;
+                    cCtx.beginPath(); cCtx.arc(90, 155, 20, 0, Math.PI); cCtx.fill();
+                } else if (profile.facialHair === 'full_beard') {
+                    cCtx.fillStyle = '#451a03';
+                    cCtx.beginPath(); cCtx.ellipse(90, 150, 55, 45, 0, 0, Math.PI); cCtx.fill();
+                }
+
+                // Glasses
+                if (profile.glasses) {
+                    cCtx.strokeStyle = '#1e293b';
+                    cCtx.lineWidth = 4;
+                    cCtx.strokeRect(45, 92, 38, 26);
+                    cCtx.strokeRect(97, 92, 38, 26);
+                    cCtx.beginPath(); cCtx.moveTo(83, 105); cCtx.lineTo(97, 105); cCtx.stroke();
+                }
+
+                // Smooth Clipping Border Frame
+                cCtx.strokeStyle = 'rgba(255,255,255,0.9)';
+                cCtx.lineWidth = 6;
+                cCtx.beginPath();
+                cCtx.ellipse(90, 110, 85, 105, 0, 0, Math.PI * 2);
+                cCtx.stroke();
+
+                FACE_SPRITES.push(canvas);
+            });
+
+            facesLoaded = true;
+            initApp();
+        }
+
+        function drawFace(ctx, faceIndex, x, y, width=75, height=90, angle=0) {
+            ctx.save();
+            ctx.translate(x, y);
+            if (angle !== 0) ctx.rotate(angle * Math.PI / 180);
+
+            // Shadow under head
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.beginPath();
+            ctx.ellipse(0, height * 0.45, width * 0.4, height * 0.15, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            const sprite = FACE_SPRITES[faceIndex % FACE_SPRITES.length];
+            if (sprite) {
+                ctx.drawImage(sprite, -width/2, -height/2, width, height);
+            }
+            ctx.restore();
+        }
+
+        function drawBody(ctx, x, y, color='#2563eb', pose='standing', scale=1) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            ctx.fillStyle = color;
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 3;
+
+            if (pose === 'standing') {
+                // Torso
+                ctx.beginPath(); ctx.roundRect(-22, 0, 44, 65, [10, 10, 0, 0]); ctx.fill(); ctx.stroke();
+                // Arms
+                ctx.beginPath(); ctx.moveTo(-22, 10); ctx.lineTo(-38, 45); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(22, 10); ctx.lineTo(38, 45); ctx.stroke();
+                // Legs
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(-18, 65, 14, 50); ctx.strokeRect(-18, 65, 14, 50);
+                ctx.fillRect(4, 65, 14, 50); ctx.strokeRect(4, 65, 14, 50);
+            } else if (pose === 'climbing') {
+                // Arms reaching up
+                ctx.beginPath(); ctx.moveTo(-20, 20); ctx.lineTo(-35, -30); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(20, 20); ctx.lineTo(35, -30); ctx.stroke();
+                // Torso
+                ctx.beginPath(); ctx.roundRect(-20, 0, 40, 60, 8); ctx.fill(); ctx.stroke();
+                // Bend legs
+                ctx.beginPath(); ctx.moveTo(-15, 60); ctx.lineTo(-30, 85); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(15, 60); ctx.lineTo(30, 80); ctx.stroke();
+            } else if (pose === 'upside_down') {
+                // Inverted pose
+                ctx.rotate(Math.PI);
+                ctx.beginPath(); ctx.roundRect(-20, 0, 40, 60, 8); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-20, 10); ctx.lineTo(-40, 35); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(20, 10); ctx.lineTo(40, 35); ctx.stroke();
+            } else if (pose === 'sitting') {
+                ctx.beginPath(); ctx.roundRect(-20, 0, 40, 50, 8); ctx.fill(); ctx.stroke();
+                ctx.fillRect(-20, 50, 45, 16); ctx.strokeRect(-20, 50, 45, 16);
+            } else if (pose === 'scuba') {
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath(); ctx.roundRect(-22, 0, 44, 60, 10); ctx.fill(); ctx.stroke();
+                // Oxygen tank on back
+                ctx.fillStyle = '#eab308';
+                ctx.fillRect(-38, 5, 15, 45); ctx.strokeRect(-38, 5, 15, 45);
+            }
+            ctx.restore();
+        }
+
+        function drawRichBackground(ctx, theme) {
+            ctx.clearRect(0,0,500,500);
+
+            if (theme === 'park_woods') {
+                // Sky gradient
+                let sky = ctx.createLinearGradient(0, 0, 0, 300);
+                sky.addColorStop(0, '#38bdf8'); sky.addColorStop(1, '#bae6fd');
+                ctx.fillStyle = sky; ctx.fillRect(0,0,500,300);
+
+                // Sun
+                ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(420, 60, 35, 0, Math.PI*2); ctx.fill();
+
+                // Distant Trees
+                ctx.fillStyle = '#166534';
+                for(let i=0; i<6; i++) {
+                    ctx.beginPath(); ctx.arc(40 + i*90, 260, 60, 0, Math.PI*2); ctx.fill();
+                }
+
+                // Grass ground
+                ctx.fillStyle = '#22c55e'; ctx.fillRect(0, 240, 500, 260);
+
+            } else if (theme === 'sports_hub') {
+                // Sports Hub & Rec Center Sky
+                let sky = ctx.createLinearGradient(0, 0, 0, 300);
+                sky.addColorStop(0, '#38bdf8'); sky.addColorStop(1, '#e0f2fe');
+                ctx.fillStyle = sky; ctx.fillRect(0,0,500,300);
+
+                // GH Sports Hub Building
+                ctx.fillStyle = '#64748b'; ctx.fillRect(30, 140, 440, 140);
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(180, 200, 140, 80); // Entrance glass
+                ctx.fillStyle = '#facc15'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign='center';
+                ctx.fillText("GH SPORTS HUB & REC", 250, 175);
+
+                // Green Sports Field Lawn
+                let grass = ctx.createLinearGradient(0, 280, 0, 500);
+                grass.addColorStop(0, '#4ade80'); grass.addColorStop(1, '#166534');
+                ctx.fillStyle = grass; ctx.fillRect(0, 280, 500, 220);
+
+            } else if (theme === 'golf_club') {
+                // Glendale Lakes Golf Club
+                ctx.fillStyle = '#7dd3fc'; ctx.fillRect(0,0,500,220);
+                // Rolling Fairway Green
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath(); ctx.ellipse(250, 350, 350, 150, 0, 0, Math.PI*2); ctx.fill();
+                // Sand Trap & Golf Pin Flag
+                ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.ellipse(380, 360, 45, 20, 0, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#f87171'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(120, 310); ctx.lineTo(120, 210); ctx.stroke();
+                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(120, 210); ctx.lineTo(150, 225); ctx.lineTo(120, 240); ctx.fill();
+
+            } else if (theme === 'dupate_river') {
+                // East Branch DuPage River Trails
+                ctx.fillStyle = '#bae6fd'; ctx.fillRect(0,0,500,200);
+                // River Stream
+                let water = ctx.createLinearGradient(0, 200, 0, 400);
+                water.addColorStop(0, '#0284c7'); water.addColorStop(1, '#0369a1');
+                ctx.fillStyle = water; ctx.fillRect(0,200,500,200);
+                // Riverbank Trail
+                ctx.fillStyle = '#a16207'; ctx.fillRect(0,380,500,120);
+
+                // River Water Ripples
+                ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(50, 250); ctx.lineTo(150, 250); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(300, 310); ctx.lineTo(420, 310); ctx.stroke();
+
+            } else if (theme === 'camera_park') {
+                // Camera Park Shelter & Playground
+                ctx.fillStyle = '#e0f2fe'; ctx.fillRect(0,0,500,280);
+                ctx.fillStyle = '#22c55e'; ctx.fillRect(0,280,500,220);
+                // Park Pavilion Pillars
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(80, 130, 25, 170); ctx.fillRect(395, 130, 25, 170);
+                // Roof
+                ctx.fillStyle = '#b91c1c';
+                ctx.beginPath(); ctx.moveTo(40, 130); ctx.lineTo(250, 40); ctx.lineTo(460, 130); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign='center';
+                ctx.fillText("CAMERA PARK SHELTER", 250, 115);
+
+            } else if (theme === 'night_search') {
+                // Night search in woods
+                ctx.fillStyle = '#020617'; ctx.fillRect(0,0,500,500);
+                // Moon
+                ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(400, 80, 30, 0, Math.PI*2); ctx.fill();
+                // Trees silhouette
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(80, 200, 30, 300); ctx.fillRect(380, 180, 35, 320);
+
+            } else {
+                // Glendale Heights Park Path
+                ctx.fillStyle = '#bae6fd'; ctx.fillRect(0,0,500,250);
+                ctx.fillStyle = '#22c55e'; ctx.fillRect(0,250,500,250);
+                // Dirt trail path
+                ctx.fillStyle = '#d97706';
+                ctx.beginPath(); ctx.moveTo(200, 250); ctx.lineTo(300, 250); ctx.lineTo(450, 500); ctx.lineTo(50, 500); ctx.fill();
+            }
+        }
+
+        // Custom Geocacher Names List
+        const GEOCACHER_NAMES = [
+            "Amtron", "Jjjjack", "Greenback", "Badlands", "Gstall", "Badcla", "Toolrep", 
+            "Scootiecache", "Aaronatwake", "Rockgirl9", "Dacachingnana", "Reetaville", 
+            "itsmrclutch", "TomEagle55", "Pawprintlogic1", "Sgauss", "TeamAlexAbby", 
+            "CerealGoods", "Oliver2573", "Moodygrrl", "Mofam"
+        ];
+
+        // ==========================================
+        // 32 UNIQUE HUMOROUS GEOCACHING SCENARIOS IN GLENDALE HEIGHTS, IL
+        // ==========================================
+        const SCENARIOS = [
+            // SCENE 0: THE WINNING COORDINATE SIGN PICTURE AT GLENDALE HEIGHTS SPORTS HUB!
+            {
+                isWinner: true,
+                caption: "🎯 PERFECT SHOT! Amtron & Jjjjack holding the coordinate sign in Glendale Heights!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    
+                    // Person 1 (Center Left)
+                    drawBody(ctx, 170, 260, '#2563eb', 'standing', 1.1);
+                    drawFace(ctx, 0, 170, 230, 80, 95);
+
+                    // Person 2 (Center Right)
+                    drawBody(ctx, 330, 260, '#dc2626', 'standing', 1.1);
+                    drawFace(ctx, 2, 330, 230, 80, 95);
+
+                    // HUGE Clear Coordinate Sign held together
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                    ctx.shadowBlur = 12;
+                    ctx.fillStyle = '#fef08a';
+                    ctx.strokeStyle = '#854d0e';
+                    ctx.lineWidth = 6;
+                    ctx.fillRect(80, 310, 340, 130);
+                    ctx.strokeRect(80, 310, 340, 130);
+                    
+                    // Inner Sign Border
+                    ctx.strokeStyle = '#ca8a04';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(88, 318, 324, 114);
+
+                    // Text
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = '900 18px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("GLENDALE HEIGHTS MYSTERY CACHE", 250, 345);
+                    
+                    ctx.fillStyle = '#1e3a8a';
+                    ctx.font = 'bold 24px monospace';
+                    ctx.fillText("N 41° 54.939′", 250, 380);
+                    ctx.fillText("W 88° 05.249′", 250, 415);
+                    ctx.restore();
+                }
+            },
+            // SCENE 1: Glendale Lakes Golf Club sand trap
+            {
+                isWinner: false,
+                caption: "Greenback stuck upside down in a Glendale Lakes Golf sand trap!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'golf_club');
+                    drawBody(ctx, 240, 220, '#16a34a', 'upside_down', 1);
+                    drawFace(ctx, 1, 240, 280, 75, 90, 180);
+                    // Ammo Can in sand
+                    ctx.fillStyle = '#3f6212'; ctx.fillRect(215, 360, 50, 35);
+                    ctx.fillStyle = '#facc15'; ctx.font = 'bold 10px monospace'; ctx.fillText("AMMO", 225, 380);
+                }
+            },
+            // SCENE 2: East Branch DuPage River scuba dive
+            {
+                isWinner: false,
+                caption: "Badlands scuba caching in East Branch DuPage River!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'dupate_river');
+                    drawBody(ctx, 250, 220, '#0f172a', 'scuba', 1.1);
+                    drawFace(ctx, 3, 250, 190, 75, 90);
+                    // Goggles overlay
+                    ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
+                    ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 3;
+                    ctx.fillRect(225, 180, 50, 20); ctx.strokeRect(225, 180, 50, 20);
+                    // Fish swimming past
+                    ctx.fillStyle = '#f97316'; ctx.beginPath(); ctx.ellipse(120, 280, 20, 10, 0, 0, Math.PI*2); ctx.fill();
+                }
+            },
+            // SCENE 3: Ghillie suit camouflage near Camera Park shelter
+            {
+                isWinner: false,
+                caption: "Gstall: Master of camouflage at Camera Park, Glendale Heights!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'camera_park');
+                    ctx.fillStyle = '#15803d';
+                    for(let b=0; b<12; b++) {
+                        ctx.beginPath(); ctx.arc(250 + (Math.sin(b)*30), 280 + (Math.cos(b)*30), 45, 0, Math.PI*2); ctx.fill();
+                    }
+                    drawFace(ctx, 4, 250, 230, 80, 95);
+                    ctx.fillStyle = '#3b82f6'; ctx.fillRect(245, 330, 12, 28);
+                }
+            },
+            // SCENE 4: Night caching near Resthaven Cemetery
+            {
+                isWinner: false,
+                caption: "Badcla nighttime caching by Resthaven Cemetery trails!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'night_search');
+                    drawBody(ctx, 250, 230, '#9333ea', 'sitting', 1);
+                    drawFace(ctx, 5, 250, 195, 75, 90);
+                    [140, 360].forEach((rx) => {
+                        ctx.fillStyle = '#64748b'; ctx.beginPath(); ctx.arc(rx, 340, 25, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = '#0f172a'; ctx.fillRect(rx-15, 330, 30, 10);
+                    });
+                }
+            },
+            // SCENE 5: Magnifying glass at GH Sports Hub entrance
+            {
+                isWinner: false,
+                caption: "Toolrep inspecting a tiny micro cache near Sports Hub!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    drawBody(ctx, 180, 240, '#ea580c', 'standing', 1.1);
+                    drawFace(ctx, 6, 180, 205, 80, 95);
+                    ctx.strokeStyle = '#475569'; ctx.lineWidth = 10;
+                    ctx.beginPath(); ctx.arc(330, 320, 55, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(290, 355); ctx.lineTo(240, 390); ctx.stroke();
+                    ctx.fillStyle = '#eab308'; ctx.fillRect(324, 310, 12, 25);
+                }
+            },
+            // SCENE 6: Metal detector at Glendale Lakes
+            {
+                isWinner: false,
+                caption: "Scootiecache metal detecting near Glendale Lakes fairway!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'golf_club');
+                    drawBody(ctx, 220, 250, '#0284c7', 'standing', 1);
+                    drawFace(ctx, 7, 220, 215, 75, 90);
+                    ctx.strokeStyle = '#334155'; ctx.lineWidth = 5;
+                    ctx.beginPath(); ctx.moveTo(220, 280); ctx.lineTo(320, 380); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(330, 385, 25, 10, 0, 0, Math.PI*2); ctx.stroke();
+                    ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(330, 395, 8, 0, Math.PI*2); ctx.fill();
+                }
+            },
+            // SCENE 7: Boulder cache at Schnitzel Garten outdoor patio
+            {
+                isWinner: false,
+                caption: "Aaronatwake, Rockgirl9 & Dacachingnana lifting a boulder cache!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'trail');
+                    drawBody(ctx, 130, 250, '#ef4444', 'standing', 0.9);
+                    drawFace(ctx, 8, 130, 220, 70, 85);
+
+                    drawBody(ctx, 220, 240, '#10b981', 'standing', 1);
+                    drawFace(ctx, 0, 220, 205, 75, 90);
+
+                    drawBody(ctx, 310, 250, '#8b5cf6', 'standing', 0.9);
+                    drawFace(ctx, 2, 310, 220, 70, 85);
+
+                    ctx.fillStyle = '#64748b';
+                    ctx.beginPath(); ctx.ellipse(220, 360, 120, 50, 0, 0, Math.PI*2); ctx.fill();
+                }
+            },
+            // SCENE 8: Briar patch on DuPage River trail
+            {
+                isWinner: false,
+                caption: "Reetaville tangled in thorn bushes along DuPage River!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'dupate_river');
+                    drawBody(ctx, 250, 240, '#ec4899', 'standing', 1);
+                    drawFace(ctx, 1, 250, 205, 80, 95);
+                    ctx.strokeStyle = '#15803d'; ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.moveTo(150, 380); ctx.lineTo(250, 260); ctx.lineTo(350, 380); ctx.stroke();
+                    ctx.fillStyle = '#fef08a'; ctx.fillRect(235, 230, 30, 12);
+                }
+            },
+            // SCENE 9: Hollow log inspection near local park
+            {
+                isWinner: false,
+                caption: "itsmrclutch inspecting a hollow log by Glendale Heights park!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'night_search');
+                    ctx.fillStyle = '#78350f'; ctx.fillRect(260, 280, 180, 80);
+                    ctx.fillStyle = '#451a03'; ctx.beginPath(); ctx.ellipse(260, 320, 25, 40, 0, 0, Math.PI*2); ctx.fill();
+                    drawBody(ctx, 170, 250, '#f59e0b', 'standing', 1);
+                    drawFace(ctx, 3, 170, 215, 75, 90);
+                    ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
+                    ctx.beginPath(); ctx.moveTo(190, 260); ctx.lineTo(280, 290); ctx.lineTo(280, 350); ctx.fill();
+                }
+            }
+        ];
+
+        // Glendale Heights Landmark Captions Array
+        const GH_LANDMARKS = [
+            "Glendale Heights Sports Hub",
+            "Glendale Lakes Golf Club",
+            "East Branch DuPage River Trail",
+            "Camera Park Pavilion",
+            "Resthaven Cemetery Woods",
+            "Schnitzel Garten Local Spot",
+            "Glendale Heights Civic Center",
+            "Fullerton Avenue Park Trail"
+        ];
+
+        // Fill remaining scenes up to 32 with named geocachers
+        for(let s=10; s<32; s++) {
+            const spotName = GH_LANDMARKS[s % GH_LANDMARKS.length];
+            const name1 = GEOCACHER_NAMES[s % GEOCACHER_NAMES.length];
+            const name2 = GEOCACHER_NAMES[(s + 7) % GEOCACHER_NAMES.length];
+            const name3 = GEOCACHER_NAMES[(s + 13) % GEOCACHER_NAMES.length];
+
+            const count = (s % 3) + 1;
+            let sceneCaption = "";
+            if (count === 1) sceneCaption = `${name1} exploring ${spotName}!`;
+            else if (count === 2) sceneCaption = `${name1} & ${name2} searching at ${spotName}!`;
+            else sceneCaption = `${name1}, ${name2} & ${name3} group caching at ${spotName}!`;
+
+            SCENARIOS.push({
+                isWinner: false,
+                caption: sceneCaption,
+                render: ((index, locationName, numPeople) => (ctx) => {
+                    const bgTypes = ['sports_hub', 'golf_club', 'dupate_river', 'camera_park', 'trail'];
+                    const bg = bgTypes[index % bgTypes.length];
+                    drawRichBackground(ctx, bg);
+                    
+                    const f1 = (index * 2) % 9;
+                    const f2 = (index * 3 + 1) % 9;
+                    const f3 = (index * 5 + 2) % 9;
+
+                    if (numPeople === 1) {
+                        drawBody(ctx, 250, 250, '#2563eb', 'standing', 1.1);
+                        drawFace(ctx, f1, 250, 210, 80, 95);
+                    } else if (numPeople === 2) {
+                        drawBody(ctx, 180, 250, '#10b981', 'standing', 1);
+                        drawFace(ctx, f1, 180, 210, 75, 90);
+                        drawBody(ctx, 320, 250, '#ef4444', 'standing', 1);
+                        drawFace(ctx, f2, 320, 210, 75, 90);
+                    } else {
+                        drawBody(ctx, 130, 260, '#f59e0b', 'standing', 0.9);
+                        drawFace(ctx, f1, 130, 225, 70, 85);
+                        drawBody(ctx, 250, 250, '#8b5cf6', 'standing', 1);
+                        drawFace(ctx, f2, 250, 210, 75, 90);
+                        drawBody(ctx, 370, 260, '#ec4899', 'standing', 0.9);
+                        drawFace(ctx, f3, 370, 225, 70, 85);
+                    }
+
+                    // Props
+                    if (index % 2 === 0) {
+                        ctx.fillStyle='#0f172a'; ctx.fillRect(240, 310, 20, 35);
+                        ctx.fillStyle='#38bdf8'; ctx.fillRect(243, 314, 14, 18);
+                    } else {
+                        ctx.fillStyle='#94a3b8'; ctx.beginPath(); ctx.ellipse(250, 380, 45, 20, 0, 0, Math.PI*2); ctx.fill();
+                    }
+                })(s, spotName, count)
+            });
+        }
+
+        // ==========================================
+        // APP CONTROLLER STATE
+        // ==========================================
+        let deck = [];
+        let currentIndex = -1;
+        let photoCount = 0;
+        let album = [];
+
+        const canvas = document.getElementById('photoCanvas');
+        const ctx = canvas.getContext('2d');
+        const shutterBtn = document.getElementById('shutter-btn');
+        const lensArea = document.getElementById('lens-click-area');
+        const flashOverlay = document.getElementById('flash-overlay');
+        const photoWrapper = document.getElementById('photo-wrapper');
+        const photoCaption = document.getElementById('photo-caption');
+        const photoCountEl = document.getElementById('photo-count');
+        const galleryStrip = document.getElementById('gallery-strip');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function initApp() {
+            // Shuffle Deck
+            deck = [...SCENARIOS];
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+
+            currentIndex = -1;
+            photoCount = 0;
+            album = [];
+            photoCountEl.textContent = "0";
+            galleryStrip.innerHTML = '<div id="empty-album-msg" class="text-xs text-slate-500 italic w-full text-center py-2">No photos taken yet. Snap pictures using the camera!</div>';
+
+            // Initial Canvas Placeholder
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, 500, 500);
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText("📷 Glendale Heights 35mm Loaded", 250, 220);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '16px sans-serif';
+            ctx.fillText("Click the RED SNAP BUTTON to take photos!", 250, 260);
+            photoCaption.textContent = "Click the camera shutter button!";
+        }
+
+        function triggerPhotoSnap() {
+            if (!facesLoaded) return;
+
+            playShutterSound();
+
+            // Camera Flash effect
+            flashOverlay.classList.add('active');
+            setTimeout(() => {
+                flashOverlay.classList.remove('active');
+            }, 140);
+
+            // Cycle deck index
+            currentIndex = (currentIndex + 1) % deck.length;
+            photoCount++;
+            photoCountEl.textContent = Math.min(photoCount, deck.length);
+
+            const currentScene = deck[currentIndex];
+            currentScene.render(ctx);
+
+            // Eject animation
+            photoWrapper.classList.remove('photo-eject');
+            void photoWrapper.offsetWidth;
+            photoWrapper.classList.add('photo-eject');
+
+            photoCaption.textContent = currentScene.caption;
+
+            if (currentScene.isWinner) {
+                photoCaption.className = "polaroid-font text-xl text-emerald-600 font-extrabold flex items-center justify-center px-2 animate-bounce";
+            } else {
+                photoCaption.className = "polaroid-font text-lg text-slate-800 flex items-center justify-center px-2";
+            }
+
+            // Save Snapshot to Album Strip
+            saveToAlbum(currentScene);
+        }
+
+        function saveToAlbum(scene) {
+            const emptyMsg = document.getElementById('empty-album-msg');
+            if (emptyMsg) emptyMsg.remove();
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            const thumb = document.createElement('div');
+            thumb.className = `flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 cursor-pointer transition-transform hover:scale-105 ${scene.isWinner ? 'border-amber-400 ring-2 ring-amber-400' : 'border-slate-700'}`;
+            
+            thumb.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover" title="${scene.caption}">`;
+            
+            thumb.addEventListener('click', () => {
+                scene.render(ctx);
+                photoCaption.textContent = scene.caption;
+                if (scene.isWinner) {
+                    photoCaption.className = "polaroid-font text-xl text-emerald-600 font-extrabold flex items-center justify-center px-2";
+                } else {
+                    photoCaption.className = "polaroid-font text-lg text-slate-800 flex items-center justify-center px-2";
+                }
+            });
+
+            galleryStrip.prepend(thumb);
+        }
+
+        // Event Listeners
+        shutterBtn.addEventListener('click', triggerPhotoSnap);
+        lensArea.addEventListener('click', triggerPhotoSnap);
+        resetBtn.addEventListener('click', initApp);
+
+        // Start initialization
+        window.onload = () => {
+            prepareFaceSprites();
+        };
+    </script>
+</body>
+</html>
