@@ -99,7 +99,7 @@
             </h1>
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed bg-slate-800/80 backdrop-blur-md p-4 rounded-xl border border-slate-700/60 shadow-lg">
                 📸 You are a photographer taking pictures around town in Glendale Heights, Illinois! From Sports Hub to Glendale Lakes Golf Club and East Branch DuPage River, click the red shutter button on the camera below to snap photos. 
-                <strong class="text-amber-300 block mt-1">Each time you take a picture, make sure to look at it closely to see if there are a set of coordinates in it! (Must snap at least 20 times first).</strong>
+                <strong class="text-amber-300 block mt-1">Keep snapping! Take 20 photos around town to discover the mystery cache coordinates!</strong>
             </p>
         </header>
 
@@ -116,7 +116,7 @@
                     </div>
                     <!-- Photo Counter -->
                     <div class="bg-slate-950 px-3 py-1 rounded-md border border-slate-800 text-amber-400 font-mono text-xs shadow-inner">
-                        SHOTS: <span id="photo-count" class="text-white font-bold">0</span>/32
+                        SHOTS: <span id="photo-count" class="text-white font-bold">0</span>/20
                     </div>
                 </div>
 
@@ -179,11 +179,11 @@
         <!-- Footer -->
         <footer class="mt-6 text-center text-slate-400 text-sm flex flex-col sm:flex-row gap-4 items-center">
             <button id="reset-btn" class="text-xs text-slate-400 hover:text-amber-400 underline transition-colors">
-                Shuffle & Reset Deck
+                Reset Camera
             </button>
             <span class="hidden sm:inline">•</span>
             <p class="text-xs text-slate-500">
-                Glendale Heights, IL Mystery Geocache • 30+ Random Pictures Deck
+                Glendale Heights, IL Mystery Geocache • 20 Photo Tour
             </p>
         </footer>
     </div>
@@ -232,15 +232,15 @@
         let facesLoaded = false;
 
         const FACE_PROFILES = [
-            { skin: '#f1c27d', hair: '#332922', glasses: true, facialHair: 'none', hairStyle: 'short_dark', name: 'Wide Smile' },
-            { skin: '#e0ac69', hair: '#94a3b8', glasses: false, facialHair: 'goatee', hairStyle: 'grey_short', name: 'Grey Goatee' },
-            { skin: '#f1c27d', hair: '#451a03', glasses: true, facialHair: 'none', hairStyle: 'brunette_up', name: 'Brunette Glasses' },
-            { skin: '#ffdbac', hair: 'none', glasses: false, facialHair: 'stubble', hairStyle: 'bald', name: 'Bald Stubble' },
-            { skin: '#e0ac69', hair: '#64748b', glasses: true, facialHair: 'goatee', hairStyle: 'grey_receding', name: 'Glasses Goatee' },
-            { skin: '#f1c27d', hair: '#451a03', glasses: false, facialHair: 'full_beard', hairStyle: 'bald_top', name: 'Bushy Beard' },
-            { skin: '#ffdbac', hair: '#64748b', glasses: true, facialHair: 'none', hairStyle: 'grey_crop', name: 'Smiling Glasses' },
-            { skin: '#e0ac69', hair: '#94a3b8', glasses: true, facialHair: 'stubble', hairStyle: 'grey_thin', name: 'Round Glasses' },
-            { skin: '#f1c27d', hair: '#94a3b8', glasses: false, facialHair: 'none', hairStyle: 'grey_wavy', name: 'Wavy Hair' }
+            { skin: '#f1c27d', hair: '#332922', glasses: true, facialHair: 'none', hairStyle: 'short_dark' },
+            { skin: '#e0ac69', hair: '#94a3b8', glasses: false, facialHair: 'goatee', hairStyle: 'grey_short' },
+            { skin: '#f1c27d', hair: '#451a03', glasses: true, facialHair: 'none', hairStyle: 'brunette_up' },
+            { skin: '#ffdbac', hair: 'none', glasses: false, facialHair: 'stubble', hairStyle: 'bald' },
+            { skin: '#e0ac69', hair: '#64748b', glasses: true, facialHair: 'goatee', hairStyle: 'grey_receding' },
+            { skin: '#f1c27d', hair: '#451a03', glasses: false, facialHair: 'full_beard', hairStyle: 'bald_top' },
+            { skin: '#ffdbac', hair: '#64748b', glasses: true, facialHair: 'none', hairStyle: 'grey_crop' },
+            { skin: '#e0ac69', hair: '#94a3b8', glasses: true, facialHair: 'stubble', hairStyle: 'grey_thin' },
+            { skin: '#f1c27d', hair: '#94a3b8', glasses: false, facialHair: 'none', hairStyle: 'grey_wavy' }
         ];
 
         function prepareFaceSprites() {
@@ -442,37 +442,224 @@
         }
 
         // ==========================================
-        // GEOCACHER LIST (23 NAMES)
-        // ==========================================
-        const GEOCACHER_NAMES = [
-            "Badcla", "Badlands", "Jjjjack", "Oliver2573", "Amtron", 
-            "Pawprintlogic1", "Aaronatwake", "Gstall", "Rockgirl9", "Dacachingnana", 
-            "TeamAlexAbby", "CerealGoods", "Moodygrrl", "Wheels00", "Toolrep", 
-            "Scootiecache", "JJ77", "K'wren", "MoFam", "Greenback", 
-            "Backfromcali", "Streamwood Cachers", "MGB Music"
-        ];
-
-        // Custom humorous scenarios per cacher
-        const CACHER_ACTIVITIES = [
-            "inspecting a micro container hidden under a bench!",
-            "climbing a pine tree searching for a bison tube!",
-            "scuba caching down in the East Branch DuPage River!",
-            "decoding a mystery cipher at the Glendale Heights Sports Hub!",
-            "checking behind a sign near Camera Park shelter!",
-            "using a metal detector on the Glendale Lakes fairway!",
-            "lifting a giant boulder looking for an ammo can!",
-            "logging a find with a custom rubber stamp!",
-            "searching night-trails with a high-powered UV flashlight!"
-        ];
-
-        // ==========================================
-        // ALL GEOCACHING SCENARIOS IN GLENDALE HEIGHTS
+        // 20 EXACT FIXED SCENARIOS IN ORDER
+        // (Includes all 24 names across Shots 1 to 19, ending with the Winner on Shot 20)
         // ==========================================
         const SCENARIOS = [
-            // INDEX 0: THE WINNING COORDINATE SIGN (UNLOCKED AT 20+ CLICKS)
+            // Shot 1
             {
-                isWinner: true,
-                caption: "🎯 PERFECT SHOT! Amtron & Jjjjack holding the coordinate sign in Glendale Heights!",
+                caption: "Shot 1: Badcla & Badlands checking for micro caches around Glendale Heights!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    drawBody(ctx, 180, 240, '#2563eb', 'standing', 1);
+                    drawFace(ctx, 0, 180, 205, 75, 90);
+                    drawBody(ctx, 320, 240, '#dc2626', 'standing', 1);
+                    drawFace(ctx, 1, 320, 205, 75, 90);
+                }
+            },
+            // Shot 2
+            {
+                caption: "Shot 2: Jjjjack & Oliver2573 inspecting a pine tree for a bison tube!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'park_woods');
+                    drawBody(ctx, 180, 240, '#16a34a', 'climbing', 1);
+                    drawFace(ctx, 2, 180, 205, 75, 90);
+                    drawBody(ctx, 320, 240, '#ca8a04', 'standing', 1);
+                    drawFace(ctx, 3, 320, 205, 75, 90);
+                }
+            },
+            // Shot 3
+            {
+                caption: "Shot 3: Amtron & Pawprintlogic1 inspecting a bench near Camera Park!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'camera_park');
+                    drawBody(ctx, 200, 250, '#9333ea', 'sitting', 1);
+                    drawFace(ctx, 4, 200, 215, 75, 90);
+                    drawBody(ctx, 310, 240, '#2563eb', 'standing', 1);
+                    drawFace(ctx, 5, 310, 205, 75, 90);
+                }
+            },
+            // Shot 4
+            {
+                caption: "Shot 4: Aaronatwake & Gstall decoding puzzle clues by the trail!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'trail');
+                    drawBody(ctx, 190, 240, '#ea580c', 'standing', 1);
+                    drawFace(ctx, 6, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#16a34a', 'standing', 1);
+                    drawFace(ctx, 7, 310, 205, 75, 90);
+                }
+            },
+            // Shot 5
+            {
+                caption: "Shot 5: Rockgirl9 & Dacachingnana searching near Glendale Lakes Golf Club!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'golf_club');
+                    drawBody(ctx, 200, 240, '#ec4899', 'standing', 1);
+                    drawFace(ctx, 8, 200, 205, 75, 90);
+                    drawBody(ctx, 320, 240, '#0284c7', 'standing', 1);
+                    drawFace(ctx, 0, 320, 205, 75, 90);
+                }
+            },
+            // Shot 6
+            {
+                caption: "Shot 6: TeamAlexAbby & CerealGoods checking the East Branch DuPage River trail!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'dupate_river');
+                    drawBody(ctx, 180, 240, '#8b5cf6', 'standing', 1);
+                    drawFace(ctx, 1, 180, 205, 75, 90);
+                    drawBody(ctx, 320, 240, '#eab308', 'standing', 1);
+                    drawFace(ctx, 2, 320, 205, 75, 90);
+                }
+            },
+            // Shot 7
+            {
+                caption: "Shot 7: Moodygrrl & Wheels00 searching around the Sports Hub patio!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    drawBody(ctx, 190, 240, '#06b6d4', 'standing', 1);
+                    drawFace(ctx, 3, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#10b981', 'standing', 1);
+                    drawFace(ctx, 4, 310, 205, 75, 90);
+                }
+            },
+            // Shot 8
+            {
+                caption: "Shot 8: Toolrep & Scootiecache using a flashlight during a night search!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'night_search');
+                    drawBody(ctx, 180, 240, '#3b82f6', 'standing', 1);
+                    drawFace(ctx, 5, 180, 205, 75, 90);
+                    drawBody(ctx, 320, 240, '#ef4444', 'standing', 1);
+                    drawFace(ctx, 6, 320, 205, 75, 90);
+                }
+            },
+            // Shot 9
+            {
+                caption: "Shot 9: JJ77 & K'wren searching near the park shelter pillars!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'camera_park');
+                    drawBody(ctx, 190, 240, '#6366f1', 'standing', 1);
+                    drawFace(ctx, 7, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#f59e0b', 'standing', 1);
+                    drawFace(ctx, 8, 310, 205, 75, 90);
+                }
+            },
+            // Shot 10
+            {
+                caption: "Shot 10: MoFam & Greenback checking high in a oak tree!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'park_woods');
+                    drawBody(ctx, 200, 230, '#14b8a6', 'climbing', 1);
+                    drawFace(ctx, 1, 200, 195, 75, 90);
+                    drawBody(ctx, 320, 240, '#84cc16', 'standing', 1);
+                    drawFace(ctx, 2, 320, 205, 75, 90);
+                }
+            },
+            // Shot 11
+            {
+                caption: "Shot 11: Backfromcali & Streamwood Cachers investigating a metal guardrail!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'trail');
+                    drawBody(ctx, 180, 240, '#ec4899', 'standing', 1);
+                    drawFace(ctx, 3, 180, 205, 75, 90);
+                    drawBody(ctx, 320, 240, '#3b82f6', 'standing', 1);
+                    drawFace(ctx, 4, 320, 205, 75, 90);
+                }
+            },
+            // Shot 12
+            {
+                caption: "Shot 12: MGBMusic & Melody double-checking GPS coordinates!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    drawBody(ctx, 190, 240, '#a855f7', 'standing', 1);
+                    drawFace(ctx, 5, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#f43f5e', 'standing', 1);
+                    drawFace(ctx, 6, 310, 205, 75, 90);
+                }
+            },
+            // Shot 13
+            {
+                caption: "Shot 13: Badcla & Gstall checking near the Glendale Lakes water hazard!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'golf_club');
+                    drawBody(ctx, 200, 240, '#0284c7', 'standing', 1);
+                    drawFace(ctx, 7, 200, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#16a34a', 'standing', 1);
+                    drawFace(ctx, 8, 310, 205, 75, 90);
+                }
+            },
+            // Shot 14
+            {
+                caption: "Shot 14: Jjjjack, Toolrep & Scootiecache inspecting a hollow tree stump!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'park_woods');
+                    drawBody(ctx, 150, 240, '#eab308', 'standing', 0.9);
+                    drawFace(ctx, 0, 150, 210, 70, 85);
+                    drawBody(ctx, 250, 240, '#3b82f6', 'standing', 0.9);
+                    drawFace(ctx, 1, 250, 210, 70, 85);
+                    drawBody(ctx, 350, 240, '#ef4444', 'standing', 0.9);
+                    drawFace(ctx, 2, 350, 210, 70, 85);
+                }
+            },
+            // Shot 15
+            {
+                caption: "Shot 15: Amtron & Rockgirl9 finding a magnetic bolt cache!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    drawBody(ctx, 190, 240, '#2563eb', 'standing', 1);
+                    drawFace(ctx, 3, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#ec4899', 'standing', 1);
+                    drawFace(ctx, 4, 310, 205, 75, 90);
+                }
+            },
+            // Shot 16
+            {
+                caption: "Shot 16: Badlands & Pawprintlogic1 stamping the logbook!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'camera_park');
+                    drawBody(ctx, 190, 240, '#dc2626', 'standing', 1);
+                    drawFace(ctx, 5, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#9333ea', 'standing', 1);
+                    drawFace(ctx, 6, 310, 205, 75, 90);
+                }
+            },
+            // Shot 17
+            {
+                caption: "Shot 17: Aaronatwake & Dacachingnana exploring the river bridge!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'dupate_river');
+                    drawBody(ctx, 190, 240, '#ea580c', 'standing', 1);
+                    drawFace(ctx, 7, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#0284c7', 'standing', 1);
+                    drawFace(ctx, 8, 310, 205, 75, 90);
+                }
+            },
+            // Shot 18
+            {
+                caption: "Shot 18: Oliver2573 & TeamAlexAbby spotting a disguised rock!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'trail');
+                    drawBody(ctx, 190, 240, '#ca8a04', 'standing', 1);
+                    drawFace(ctx, 0, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#8b5cf6', 'standing', 1);
+                    drawFace(ctx, 1, 310, 205, 75, 90);
+                }
+            },
+            // Shot 19
+            {
+                caption: "Shot 19: CerealGoods & Moodygrrl getting closer to the final location!",
+                render: (ctx) => {
+                    drawRichBackground(ctx, 'sports_hub');
+                    drawBody(ctx, 190, 240, '#eab308', 'standing', 1);
+                    drawFace(ctx, 2, 190, 205, 75, 90);
+                    drawBody(ctx, 310, 240, '#06b6d4', 'standing', 1);
+                    drawFace(ctx, 3, 310, 205, 75, 90);
+                }
+            },
+            // Shot 20 (FINAL WINNING COORDINATE REVEAL)
+            {
+                caption: "🎯 PERFECT SHOT #20! You found the coordinate sign in Glendale Heights!",
                 render: (ctx) => {
                     drawRichBackground(ctx, 'sports_hub');
                     drawBody(ctx, 170, 260, '#2563eb', 'standing', 1.1);
@@ -507,22 +694,6 @@
             }
         ];
 
-        // Generate specific humorous scenarios for every single named cacher
-        GEOCACHER_NAMES.forEach((name, idx) => {
-            const activity = CACHER_ACTIVITIES[idx % CACHER_ACTIVITIES.length];
-            const theme = idx % 3 === 0 ? 'park_woods' : (idx % 3 === 1 ? 'sports_hub' : 'camera_park');
-            
-            SCENARIOS.push({
-                isWinner: false,
-                caption: `${name} ${activity}`,
-                render: (ctx) => {
-                    drawRichBackground(ctx, theme);
-                    drawBody(ctx, 250, 240, idx % 2 === 0 ? '#2563eb' : '#16a34a', idx % 4 === 0 ? 'climbing' : 'standing', 1);
-                    drawFace(ctx, idx, 250, 205, 75, 90);
-                }
-            });
-        });
-
         let photoCount = 0;
         const capturedPhotos = [];
 
@@ -545,15 +716,11 @@
             setTimeout(() => flash.classList.remove('active'), 150);
 
             photoCount++;
-            document.getElementById('photo-count').textContent = photoCount;
+            document.getElementById('photo-count').textContent = photoCount > 20 ? 20 : photoCount;
 
-            // Pick scenario: strictly block winner card until at least 20 clicks
-            let availableScenarios = SCENARIOS;
-            if (photoCount < 20) {
-                availableScenarios = SCENARIOS.filter(s => !s.isWinner);
-            }
-
-            const chosen = availableScenarios[Math.floor(Math.random() * availableScenarios.length)];
+            // Select scenario sequentially based on photoCount (Shot 20+ stays on the winning coordinate card)
+            const scenarioIndex = Math.min(photoCount - 1, SCENARIOS.length - 1);
+            const chosen = SCENARIOS[scenarioIndex];
 
             // Render on canvas
             const canvas = document.getElementById('photoCanvas');
