@@ -226,7 +226,7 @@
         }
 
         // ==========================================
-        // REAL FACE SPRITESET GENERATOR (Embedded / Standalone)
+        // REAL FACE SPRITESET GENERATOR
         // ==========================================
         const FACE_SPRITES = [];
         let facesLoaded = false;
@@ -442,13 +442,37 @@
         }
 
         // ==========================================
-        // 32 UNIQUE HUMOROUS GEOCACHING SCENARIOS
+        // GEOCACHER LIST (23 NAMES)
+        // ==========================================
+        const GEOCACHER_NAMES = [
+            "Badcla", "Badlands", "Jjjjack", "Oliver2573", "Amtron", 
+            "Pawprintlogic1", "Aaronatwake", "Gstall", "Rockgirl9", "Dacachingnana", 
+            "TeamAlexAbby", "CerealGoods", "Moodygrrl", "Wheels00", "Toolrep", 
+            "Scootiecache", "JJ77", "K'wren", "MoFam", "Greenback", 
+            "Backfromcali", "Streamwood Cachers", "MGB Music"
+        ];
+
+        // Custom humorous scenarios per cacher
+        const CACHER_ACTIVITIES = [
+            "inspecting a micro container hidden under a bench!",
+            "climbing a pine tree searching for a bison tube!",
+            "scuba caching down in the East Branch DuPage River!",
+            "decoding a mystery cipher at the Glendale Heights Sports Hub!",
+            "checking behind a sign near Camera Park shelter!",
+            "using a metal detector on the Glendale Lakes fairway!",
+            "lifting a giant boulder looking for an ammo can!",
+            "logging a find with a custom rubber stamp!",
+            "searching night-trails with a high-powered UV flashlight!"
+        ];
+
+        // ==========================================
+        // ALL GEOCACHING SCENARIOS IN GLENDALE HEIGHTS
         // ==========================================
         const SCENARIOS = [
-            // SCENE 0: THE WINNING COORDINATE SIGN PICTURE (INDEX 0)
+            // INDEX 0: THE WINNING COORDINATE SIGN (UNLOCKED AT 20+ CLICKS)
             {
                 isWinner: true,
-                caption: "🎯 PERFECT SHOT! Coordinate sign discovered in Glendale Heights!",
+                caption: "🎯 PERFECT SHOT! Amtron & Jjjjack holding the coordinate sign in Glendale Heights!",
                 render: (ctx) => {
                     drawRichBackground(ctx, 'sports_hub');
                     drawBody(ctx, 170, 260, '#2563eb', 'standing', 1.1);
@@ -480,99 +504,24 @@
                     ctx.fillText("W 88° 05.249′", 250, 415);
                     ctx.restore();
                 }
-            },
-            // SCENES 1 TO 31: STANDARD SCENARIOS
-            {
-                isWinner: false,
-                caption: "Greenback stuck upside down in a Glendale Lakes Golf sand trap!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'golf_club');
-                    drawBody(ctx, 240, 220, '#16a34a', 'upside_down', 1);
-                    drawFace(ctx, 1, 240, 280, 75, 90, 180);
-                    ctx.fillStyle = '#3f6212'; ctx.fillRect(215, 360, 50, 35);
-                    ctx.fillStyle = '#facc15'; ctx.font = 'bold 10px monospace'; ctx.fillText("AMMO", 225, 380);
-                }
-            },
-            {
-                isWinner: false,
-                caption: "Badlands scuba caching in East Branch DuPage River!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'dupate_river');
-                    drawBody(ctx, 250, 220, '#0f172a', 'scuba', 1.1);
-                    drawFace(ctx, 3, 250, 190, 75, 90);
-                    ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
-                    ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 3;
-                    ctx.fillRect(225, 180, 50, 20); ctx.strokeRect(225, 180, 50, 20);
-                }
-            },
-            {
-                isWinner: false,
-                caption: "Gstall: Master of camouflage at Camera Park, Glendale Heights!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'camera_park');
-                    ctx.fillStyle = '#15803d';
-                    for(let b=0; b<12; b++) {
-                        ctx.beginPath(); ctx.arc(250 + (Math.sin(b)*30), 280 + (Math.cos(b)*30), 45, 0, Math.PI*2); ctx.fill();
-                    }
-                    drawFace(ctx, 4, 250, 230, 80, 95);
-                    ctx.fillStyle = '#3b82f6'; ctx.fillRect(245, 330, 12, 28);
-                }
-            },
-            {
-                isWinner: false,
-                caption: "Badcla nighttime caching by Resthaven Cemetery trails!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'night_search');
-                    drawBody(ctx, 250, 230, '#9333ea', 'sitting', 1);
-                    drawFace(ctx, 5, 250, 195, 75, 90);
-                }
-            },
-            {
-                isWinner: false,
-                caption: "Toolrep inspecting a tiny micro cache near Sports Hub!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'sports_hub');
-                    drawBody(ctx, 180, 240, '#ea580c', 'standing', 1.1);
-                    drawFace(ctx, 6, 180, 205, 80, 95);
-                    ctx.strokeStyle = '#475569'; ctx.lineWidth = 10;
-                    ctx.beginPath(); ctx.arc(330, 320, 55, 0, Math.PI*2); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(290, 355); ctx.lineTo(240, 390); ctx.stroke();
-                }
-            },
-            {
-                isWinner: false,
-                caption: "Scootiecache metal detecting near Glendale Lakes fairway!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'golf_club');
-                    drawBody(ctx, 220, 250, '#0284c7', 'standing', 1);
-                    drawFace(ctx, 7, 220, 215, 75, 90);
-                    ctx.strokeStyle = '#334155'; ctx.lineWidth = 5;
-                    ctx.beginPath(); ctx.moveTo(220, 280); ctx.lineTo(320, 380); ctx.stroke();
-                }
-            },
-            {
-                isWinner: false,
-                caption: "Team exploring local Glendale Heights park trails!",
-                render: (ctx) => {
-                    drawRichBackground(ctx, 'park_woods');
-                    drawBody(ctx, 200, 240, '#059669', 'standing', 1);
-                    drawFace(ctx, 8, 200, 205, 75, 90);
-                }
             }
         ];
 
-        // Fill out remaining scenario slots programmatically to reach 32+ unique cards
-        for (let i = 8; i < 32; i++) {
+        // Generate specific humorous scenarios for every single named cacher
+        GEOCACHER_NAMES.forEach((name, idx) => {
+            const activity = CACHER_ACTIVITIES[idx % CACHER_ACTIVITIES.length];
+            const theme = idx % 3 === 0 ? 'park_woods' : (idx % 3 === 1 ? 'sports_hub' : 'camera_park');
+            
             SCENARIOS.push({
                 isWinner: false,
-                caption: `Snapshot #${i + 1}: Cachers exploring scenic Glendale Heights landmarks!`,
+                caption: `${name} ${activity}`,
                 render: (ctx) => {
-                    drawRichBackground(ctx, i % 2 === 0 ? 'park_woods' : 'trail');
-                    drawBody(ctx, 250, 240, i % 3 === 0 ? '#3b82f6' : '#ec4899', 'standing', 1);
-                    drawFace(ctx, i, 250, 205, 75, 90);
+                    drawRichBackground(ctx, theme);
+                    drawBody(ctx, 250, 240, idx % 2 === 0 ? '#2563eb' : '#16a34a', idx % 4 === 0 ? 'climbing' : 'standing', 1);
+                    drawFace(ctx, idx, 250, 205, 75, 90);
                 }
             });
-        }
+        });
 
         let photoCount = 0;
         const capturedPhotos = [];
@@ -598,7 +547,7 @@
             photoCount++;
             document.getElementById('photo-count').textContent = photoCount;
 
-            // Pick scenario: prevent winning card before 20 clicks
+            // Pick scenario: strictly block winner card until at least 20 clicks
             let availableScenarios = SCENARIOS;
             if (photoCount < 20) {
                 availableScenarios = SCENARIOS.filter(s => !s.isWinner);
@@ -631,7 +580,7 @@
             if (capturedPhotos.length === 0) return;
 
             strip.innerHTML = '';
-            capturedPhotos.forEach((photo, idx) => {
+            capturedPhotos.forEach((photo) => {
                 const thumb = document.createElement('div');
                 thumb.className = 'w-16 h-16 rounded border-2 border-slate-700 overflow-hidden cursor-pointer hover:border-amber-400 shrink-0 transition-colors';
                 thumb.innerHTML = `<img src="${photo.dataUrl}" class="w-full h-full object-cover">`;
